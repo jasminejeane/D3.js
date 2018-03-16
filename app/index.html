@@ -190,7 +190,7 @@
                                  .attr('id', 'container')
                                  .attr('width', width + padding * 2)
                                  .attr('height', height + padding * 2);
-        
+
         var info = d3.select('#graph')
                         .select('#info')
                         .style('width', width + padding * 2)
@@ -219,6 +219,7 @@
                            .scale(tempScale)
                            .orient("right")
                            .tickFormat(function(d) {
+                             console.log("d", d);
                                 d = d.toString();
                                 return d.substr(0, d.length-1) + '.' + d.substr(-1);
                         });
@@ -242,8 +243,8 @@
             .style('background', '#cc627a');
 
 
-        d3.csv('climate_data_truncated.csv', function(data) {
-
+        d3.json('animals.json', function(data) {
+          console.log("data", data);
 
             // find min and max of data set
             // note, MaxTemp and MinTemp are two seperate
@@ -255,7 +256,7 @@
             tempScaleMin = d3.min(data, function(d){
                 return parseInt(d.TMIN)
             });
-            
+
             // Now we will use the "extent" method to accomplish the same
             // thing but in one function!
             // Even though we have this nifty function, we'll still use
@@ -275,10 +276,10 @@
             // and lowest values
             tempScale.domain([parseInt(tempScaleMin), parseInt(tempScaleMax) * 1.1]);
             rainScale.domain([0, parseInt(rainScaleExtent[1])]);
-            
+
             oneDayEarlier = function(date) { return date.setDate(date.getDate() - 1) };
             oneDayLater = function(date) {return date.setDate(date.getDate() + 1)};
-            
+
             xScale.domain([oneDayEarlier(xScaleExtent[0]), oneDayLater(xScaleExtent[1])]);
 
             // create the x axis based on time
@@ -312,7 +313,7 @@
                 .enter().append('g')
                 .attr('class', 'bars')
                 .attr('transform', function(d) {
-                    return 'translate(' + xScale(createDate(d.DATE)) + ',' 
+                    return 'translate(' + xScale(createDate(d.DATE)) + ','
                                         + tempScale(d.TMIN) + ')' });
 
             bars.append('line')
@@ -347,14 +348,14 @@
                 .attr('class', 'label')
 
             viz.on("mousemove", vizMouseMove);
-    
+
             function vizMouseMove() {
                 x = d3.mouse(this)[0],
                 date = xScale.invert(x),
-                dateString = createString(date), 
+                dateString = createString(date),
                 i = bisectDate(data, dateString, 1),
                 d = data[i];
-                
+
                 cursor = viz.select('#cursor');
                 currentData = d3.select('#current-data')
                                  .select('h2');
@@ -367,19 +368,19 @@
                 };
                 cursor.attr('x1', x)
                       .attr('x2', x)
-                
+
                 tempMin = d.TMIN;
                 tempMin = tempMin.substr(0, tempMin.length-1) + '.' + tempMin.substr(-1)
                 tempMax = d.TMAX
                 tempMax = tempMax.substr(0, tempMax.length-1) + '.' + tempMax.substr(-1)
-                
+
                 displayDay = d3.time.format("%a., %b. %e, %Y");
                 currentData.html("On " + displayDay(date) +
                 " there was " + d.PRCP + "MM of rainfall," +
-                " and a temperature ranging from " + tempMin + 
+                " and a temperature ranging from " + tempMin +
                 "(\u2103) to " + tempMax + "(\u2103)");
-                
-            
+
+
             }
         });
 
